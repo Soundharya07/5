@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-configmap
+data:
+  github-url: https://raw.githubusercontent.com/myusername/myrepo/master/myfile.txt
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: main-container
+    image: myimage:latest
+    command: ["mycommand"]
+  initContainers:
+  - name: init-container
+    image: alpine:latest
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      wget $(cat /config/github-url) -O /data/myfile.txt
+    volumeMounts:
+    - name: data-volume
+      mountPath: /data
+  volumes:
+  - name: data-volume
+    emptyDir: {}
+  restartPolicy: Never
